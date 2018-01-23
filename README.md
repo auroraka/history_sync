@@ -1,5 +1,5 @@
-#### Hsync
-Hsync is a history sync script base on git.
+#### History sync
+History sync script base on git.
 
 This script parse history file to python class, merge histories with remote, and save it to your git server.
 
@@ -20,8 +20,8 @@ This script parse history file to python class, merge histories with remote, and
     for example:`git@github.com:auroraka/my_history.git`
 - clone project
 ```bash
-git clone git@github.com:auroraka/hsync.git ~/.hsync
-cd ~/.hsync
+git clone git@github.com:auroraka/history_sync.git ~/.history_sync
+cd ~/.history_sync
 ```
 - record your new repo in `settings.py`
     
@@ -36,15 +36,15 @@ cd ~/.hsync
 - add command alias to bashrc
 for bash user
 ```bash
-echo 'alias hsync="$HOME/.hsync/sync.py"' > ~/.bashrc
+echo 'alias history_sync="$HOME/.history_sync/sync.py"' > ~/.bashrc
 ```
 for zsh user
 ```bash
-echo 'alias hsync="$HOME/.hsync/sync.py"' > ~/.zshrc
+echo 'alias history_sync="$HOME/.history_sync/sync.py"' > ~/.zshrc
 ```
 for fish user
 ```bash
-echo 'alias hsync "$HOME/.hsync/sync.py"' > ~/.config/fish/config.fish
+echo 'alias history_sync "$HOME/.history_sync/sync.py"' > ~/.config/fish/config.fish
 ```
 - refresh your shell and enjoy it
 ```bash
@@ -54,17 +54,17 @@ exec $0
 #### Auto sync history
 - add these command to the end of your bashrc/zshrc
 ```bash
-if [[ -f $HOME/.hsync/autosync.py ]];then;$HOME/.hsync/autosync.py;fi
+if [[ -f $HOME/.history_sync/autosync.py ]];then;$HOME/.history_sync/autosync.py;fi
 ```
 
 #### Command
 ```bash
-hsync            # sync all shells
-hsync bash zsh   # sync specific shells
+history_sync            # sync all shells
+history_sync bash zsh   # sync specific shells
 ```
 
 #### Add New Shell
-hsync now support these shells
+history_sync now support these shells
 - bash
 - zsh
 - fish
