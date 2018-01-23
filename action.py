@@ -1,4 +1,4 @@
-from collections import defaultdict
+from operator import attrgetter
 
 
 def filter_white_line_action(histories):
@@ -7,6 +7,22 @@ def filter_white_line_action(histories):
 
 def unique_action(histories):
     return list(set(histories))
+
+
+def unique_cmd_action(histories):
+    histories = sorted(histories, key=attrgetter('cmd', 'time'))
+    try:
+        last = histories[0]
+        last.cmd = '#'
+    except Exception as e:
+        last = None
+
+    new_histories = []
+    for h in histories:
+        if h.cmd != last.cmd:
+            new_histories.append(h)
+        last = h
+    return new_histories
 
 
 def delete_password_action(histories):

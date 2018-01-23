@@ -6,6 +6,7 @@ import tools
 import settings
 import codecs
 
+
 class History:
     DEFAULT_HISTORY_FILE = '~/.my_history/history'
     _SEPARATOR = '\n'
@@ -61,9 +62,9 @@ class History:
         if cls2 is None:
             cls2 = cls
 
-        with codecs.open(file1, 'r',encoding='utf-8',errors='ignore') as f:
+        with codecs.open(file1, 'r', encoding='utf-8', errors='ignore') as f:
             text1 = f.read()
-        with codecs.open(file2, 'r',encoding='utf-8',errors='ignore') as f:
+        with codecs.open(file2, 'r', encoding='utf-8', errors='ignore') as f:
             text2 = f.read()
         text_save = cls._merge_text(text1, text2, cls1, cls2)
         with open(file_save, 'w') as f:
@@ -72,6 +73,13 @@ class History:
     @classmethod
     def _convert_text(cls, text1, cls1=None):
         histories = cls1._parse_text(text1, cls)
+
+        for func in cls._before_merge_actions:
+            histories = func(histories)
+        for func in cls._after_merge_actions:
+            histories = func(histories)
+        histories = cls._sort(histories)
+
         text_save = cls._SEPARATOR.join([h.__str__() for h in histories]) + cls._SEPARATOR
         return text_save
 
@@ -79,7 +87,7 @@ class History:
     def convert_file(cls, file1, file_save, cls1=None):
         if cls1 is None:
             cls1 = cls
-        with codecs.open(file1, 'r',encoding='utf-8',errors='ignore') as f:
+        with codecs.open(file1, 'r', encoding='utf-8', errors='ignore') as f:
             text1 = f.read()
         text_save = cls._convert_text(text1, cls1)
         with codecs.open(file_save, 'w') as f:
@@ -130,6 +138,7 @@ class BashHistory(History):
 
 class ZshHistory(History):
     DEFAULT_HISTORY_FILE = '~/.zsh_history'
+    _after_merge_actions = History._after_merge_actions + [unique_cmd_action]
 
     @staticmethod
     def _parse_text(text, aim_cls=None):
@@ -202,13 +211,15 @@ class FishHistory(History):
 
 if __name__ == '__main__':
     # History.merge_file('test/za', 'test/fb', 'test/co', cls1=ZshHistory, cls2=FishHistory)
+    # ZshHistory.merge_file('test/a', 'test/b', 'test/c')
+    ZshHistory.convert_file('test/a', 'test/c')
     # with open('test/co') as f:
     #     hs = History._parse_text(f.read())
     #     for h in hs:
     #         # pass
     #         h.__class__ = ZshHistory
     #         print(h)
-    print(History._get_history_dir())
-    print(ZshHistory._get_history_dir())
-    print(FishHistory._get_history_dir())
+    # print(History._get_history_dir())
+    # print(ZshHistory._get_history_dir())
+    # print(FishHistory._get_history_dir())
     pass

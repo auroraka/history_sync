@@ -77,7 +77,7 @@ you can add more shell by inherit `History` class in history.py , and realize `_
 
 #### Plugin
 you can add plugins before/after merge, and register by change attribute `_before_merge_actions`,`_after_merge_actions` of History class.
-
+see `action.py`
 
 #### Settings
 <a name="setting"></a>
