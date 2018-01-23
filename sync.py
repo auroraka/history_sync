@@ -115,6 +115,9 @@ def sync():
         for shell in shells:
             ShellHistory = globals()[shell.capitalize() + 'History']
             shell_his_dir = ShellHistory._get_history_dir()
+            if not os.path.exists(shell_his_dir):
+                Log('%s shell history does not exist' % shell)
+                continue
             ShellHistory.convert_file(settings.HISTORY_FILE_NAME, shell_his_dir, cls1=History)
     except Exception as e:
         LogError('[Error while syncing]')
