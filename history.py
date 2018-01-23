@@ -4,7 +4,7 @@ from action import *
 import pickle
 import tools
 import settings
-
+import codecs
 
 class History:
     DEFAULT_HISTORY_FILE = '~/.my_history/history'
@@ -61,9 +61,9 @@ class History:
         if cls2 is None:
             cls2 = cls
 
-        with open(file1, 'r') as f:
+        with codecs.open(file1, 'r',encoding='utf-8',errors='ignore') as f:
             text1 = f.read()
-        with open(file2, 'r') as f:
+        with codecs.open(file2, 'r',encoding='utf-8',errors='ignore') as f:
             text2 = f.read()
         text_save = cls._merge_text(text1, text2, cls1, cls2)
         with open(file_save, 'w') as f:
@@ -80,10 +80,10 @@ class History:
     def convert_file(cls, file1, file_save, cls1=None):
         if cls1 is None:
             cls1 = cls
-        with open(file1, 'r') as f:
+        with codecs.open(file1, 'r',encoding='utf-8',errors='ignore') as f:
             text1 = f.read()
         text_save = cls._convert_text(text1, cls1)
-        with open(file_save, 'w') as f:
+        with codecs.open(file_save, 'w') as f:
             f.write(text_save)
 
     @staticmethod
