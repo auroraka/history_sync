@@ -54,7 +54,7 @@ exec $0
 #### Auto sync history
 - add these command to the end of your bashrc/zshrc
 ```bash
-if [[ -d $HOME/.hsync/autosync.py ]];then;$HOME/.hsync/autosync.py;fi
+if [[ -f $HOME/.hsync/autosync.py ]];then;$HOME/.hsync/autosync.py;fi
 ```
 
 #### Command
