@@ -86,7 +86,7 @@ settings store in `settings.py`
 - LAST_UPDATE_FILE_NAME: file name of last update time record
 - UPDATE_PERIOD: time period of history sync
 
-example file of `settings.py`
+example file of `settings.py`, you can find this text under `settings.py.example`
 ```python
 from datetime import timedelta
 
