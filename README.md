@@ -10,6 +10,10 @@ This script parse history file to python class, merge histories with remote, and
 - use git to **achieve security** and **push history to origin**
 - **auto sync** history when shell start up
 
+#### Require
+- git version >= 2.0
+- python version >= 3.0
+
 #### Install
 - create an empty repository in github to store your history files, we recommend to use a private repo
 
@@ -40,7 +44,7 @@ echo 'alias hsync="$HOME/.hsync/sync.py"' > ~/.zshrc
 ```
 for fish user
 ```bash
-echo 'alias hsync="$HOME/.hsync/sync.py"' > ~/.config/fish/config.fish
+echo 'alias hsync "$HOME/.hsync/sync.py"' > ~/.config/fish/config.fish
 ```
 - restart your shell and enjoy it
 ```bash
@@ -89,7 +93,7 @@ settings store in `settings.py`
 | LAST_UPDATE_FILE_NAME      | file name of last update time record | no       | .last_update |
 | UPDATE_PERIOD              | time period of history sync          | no       | 7 days       |
 
-example file of `settings.py`, you can find this text under `settings_example.py`
+example file of `settings.py`, you can find this text under `settings_default.py`
 ```python
 from datetime import timedelta
 
