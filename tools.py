@@ -3,7 +3,7 @@ import os
 
 try:
     import settings
-except ModuleNotFoundError as e:
+except ImportError as e:
     settings_file = os.path.join(os.path.dirname(__file__), 'settings.py')
     if not os.path.exists(settings_file):
         open(settings_file, 'a').close()
