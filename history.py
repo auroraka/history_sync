@@ -51,7 +51,7 @@ class History:
         histories_save = cls._merge_history(histories1, histories2)
         text_save = cls._SEPARATOR.join([h.__str__() for h in histories_save]) + cls._SEPARATOR
         tools.Log('%s(%s) + %s(%s) => %s(%s)' % (
-            cls1.__name__, len(text1), cls2.__name__, len(text2), cls.__name__, len(text_save)))
+            cls1.__name__, len(histories1), cls2.__name__, len(histories2), cls.__name__, len(histories_save)))
         return text_save
 
     @classmethod
@@ -73,7 +73,6 @@ class History:
     def _convert_text(cls, text1, cls1=None):
         histories = cls1._parse_text(text1, cls)
         text_save = cls._SEPARATOR.join([h.__str__() for h in histories]) + cls._SEPARATOR
-        tools.Log('%s(%s) => %s(%s)' % (cls1.__name__, len(text1), cls.__name__, len(text_save)))
         return text_save
 
     @classmethod
