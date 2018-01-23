@@ -2,24 +2,20 @@ from datetime import datetime
 from operator import attrgetter
 from action import *
 import pickle
-
-
-class Tools:
-    @staticmethod
-    def filter_white_lines(lines):
-        lines = [l.strip() for l in lines]
-        lines = [l for l in lines if l]
-        return lines
+import tools
+import settings
 
 
 class History:
+    DEFAULT_HISTORY_FILE = '~/.my_history/history'
     _SEPARATOR = '\n'
-    _brefore_merge_actions = [filter_white_line_action]
+    _before_merge_actions = [filter_white_line_action]
     _after_merge_actions = [unique_action, delete_password_action, limit_length_action]
 
     _DEFAULT_TIME = datetime.fromtimestamp(1)
 
     def __init__(self, cmd='', time=_DEFAULT_TIME, duration=0, paths=None):
+
         if paths is None:
             paths = []
         self.cmd = cmd
@@ -40,11 +36,23 @@ class History:
         return hash((self.time, self.cmd))
 
     @classmethod
+    def _get_history_dir(cls):
+        name = cls.__name__
+        his_dir = tools.camel_to_upper(name) + '_DIR'
+        if hasattr(settings, his_dir):
+            return tools.full_path(getattr(settings, his_dir))
+        else:
+            return tools.full_path(cls.DEFAULT_HISTORY_FILE)
+
+    @classmethod
     def _merge_text(cls, text1, text2, cls1=None, cls2=None):
         histories1 = cls1._parse_text(text1, cls)
         histories2 = cls2._parse_text(text2, cls)
         histories_save = cls._merge_history(histories1, histories2)
-        return cls._SEPARATOR.join([h.__str__() for h in histories_save])
+        text_save = cls._SEPARATOR.join([h.__str__() for h in histories_save]) + cls._SEPARATOR
+        tools.Log('%s(%s) + %s(%s) => %s(%s)' % (
+            cls1.__name__, len(text1), cls2.__name__, len(text2), cls.__name__, len(text_save)))
+        return text_save
 
     @classmethod
     def merge_file(cls, file1, file2, file_save, cls1=None, cls2=None):
@@ -63,7 +71,10 @@ class History:
 
     @classmethod
     def _convert_text(cls, text1, cls1=None):
-        return cls1._parse_text(text1, cls)
+        histories = cls1._parse_text(text1, cls)
+        text_save = cls._SEPARATOR.join([h.__str__() for h in histories]) + cls._SEPARATOR
+        tools.Log('%s(%s) => %s(%s)' % (cls1.__name__, len(text1), cls.__name__, len(text_save)))
+        return text_save
 
     @classmethod
     def convert_file(cls, file1, file_save, cls1=None):
@@ -90,7 +101,7 @@ class History:
 
     @classmethod
     def _merge_history(cls, histories1, histories2):
-        for func in cls._brefore_merge_actions:
+        for func in cls._before_merge_actions:
             histories1, histories2 = func(histories1), func(histories2)
         histories_save = histories1 + histories2
         for func in cls._after_merge_actions:
@@ -103,12 +114,14 @@ class History:
 
 
 class BashHistory(History):
+    DEFAULT_HISTORY_FILE = '~/.bash_history'
+
     @staticmethod
     def _parse_text(text, aim_cls=None):
         if aim_cls is None:
             aim_cls = BashHistory
         lines = text.split('\n')
-        lines = Tools.filter_white_lines(lines)
+        lines = tools.filter_white_lines(lines)
         histories = [aim_cls(cmd=l) for l in lines]
         return histories
 
@@ -117,6 +130,8 @@ class BashHistory(History):
 
 
 class ZshHistory(History):
+    DEFAULT_HISTORY_FILE = '~/.zsh_history'
+
     @staticmethod
     def _parse_text(text, aim_cls=None):
         if aim_cls is None:
@@ -149,6 +164,8 @@ class ZshHistory(History):
 
 
 class FishHistory(History):
+    DEFAULT_HISTORY_FILE = '~/.local/share/fish/fish_history'
+
     @staticmethod
     def _parse_text(text, aim_cls=None):
         if aim_cls is None:
@@ -185,10 +202,14 @@ class FishHistory(History):
 
 
 if __name__ == '__main__':
-    History.merge_file('test/za', 'test/fb', 'test/co', cls1=ZshHistory, cls2=FishHistory)
-    with open('test/co') as f:
-        hs = History._parse_text(f.read())
-        for h in hs:
-            # pass
-            h.__class__ = ZshHistory
-            print(h)
+    # History.merge_file('test/za', 'test/fb', 'test/co', cls1=ZshHistory, cls2=FishHistory)
+    # with open('test/co') as f:
+    #     hs = History._parse_text(f.read())
+    #     for h in hs:
+    #         # pass
+    #         h.__class__ = ZshHistory
+    #         print(h)
+    print(History._get_history_dir())
+    print(ZshHistory._get_history_dir())
+    print(FishHistory._get_history_dir())
+    pass
