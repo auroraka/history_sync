@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import settings
 import shutil
 import sys
@@ -29,10 +29,11 @@ def git_check_repo_exists():
     return info.split('\n')[0].split(' ')[0].split('\t')[1] == settings.HISTORY_REPO
 
 
-def git_check():
-    if not os.path.exists(settings.HISTORY_DIR):
-        sys_call('git clone %s %s' % (settings.HISTORY_REPO, settings.HISTORY_DIR), showcmd=True)
-
+def git_init_and_check():
+    if not os.path.exists(full_path(settings.HISTORY_DIR)):
+        sys_call('git clone %s %s' % (settings.HISTORY_REPO, full_path(settings.HISTORY_DIR)), showcmd=True)
+    git_dir = full_path(settings.HISTORY_DIR)
+    os.chdir(git_dir)
     if not git_check_repo_exists():
         msg = 'repo %s not found in directory: %s' % (settings.HISTORY_REPO, settings.HISTORY_DIR)
         raise Exception(msg)
@@ -62,9 +63,7 @@ def sync():
     shells = sys.argv[1:] if len(sys.argv) > 1 else get_shells()
     Log('shells: ', shells)
 
-    git_dir = full_path(settings.HISTORY_DIR)
-    os.chdir(git_dir)
-    git_check()
+    git_init_and_check()
 
     Log('==> [ pull history from origin ]')
     sys_call('git fetch origin')
