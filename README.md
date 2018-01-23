@@ -35,6 +35,12 @@ change `HISTORY_DIR` to the repo directory in `settings.py`
 exec $0
 ```
 
+#### Auto sync history
+- add these command to the end of your bashrc/zshrc
+```
+if [[ -d $HOME/.hsync/autosync.py ]];then;$HOME/.hsync/autosync.py;fi
+```
+
 #### Use
 ```
 hsync            # sync all shells

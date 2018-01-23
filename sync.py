@@ -104,8 +104,4 @@ def sync():
 
 
 if __name__ == '__main__':
-    # get_shells()
-    # print(get_shells())
     sync()
-    # h = ZshHistory()
-    # print(h.__class__.__name__)
