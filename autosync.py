@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import os
-import settings
 from datetime import datetime
-from sync import sync
 import tools
-
+import settings
+from sync import sync
 
 def auto_sync():
     tools.make_default_settings()
