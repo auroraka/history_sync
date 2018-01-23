@@ -21,7 +21,7 @@ This script parse history file to python class, merge histories with remote, and
 - clone project
 ```bash
 git clone git@github.com:auroraka/hsync.git ~/.hsync
-cd hsync
+cd ~/.hsync
 ```
 - record your new repo in `settings.py`
     
@@ -46,7 +46,7 @@ for fish user
 ```bash
 echo 'alias hsync "$HOME/.hsync/sync.py"' > ~/.config/fish/config.fish
 ```
-- restart your shell and enjoy it
+- refresh your shell and enjoy it
 ```bash
 exec $0
 ```

@@ -10,7 +10,7 @@ from tools import *
 
 def git_check_repo_bare():
     info = sys_call('git status', showcmd=False, printScreen=False)
-    return 'No commits yet' in info
+    return 'No commits yet' in info or 'Initial commit' in info
 
 
 def git_check_repo_clean():
@@ -26,6 +26,23 @@ def git_check_branch_master():
 def git_check_repo_exists():
     info = sys_call('git remote -v | grep origin', showcmd=False, printScreen=False)
     return info.split('\n')[0].split(' ')[0].split('\t')[1] == settings.HISTORY_REPO
+
+
+def git_ensure_username_and_email():
+    err = None
+    info = None
+    try:
+        info = sys_call('git config --get user.email', showcmd=False, printScreen=False)
+    except Exception as e:
+        err = e
+    if err or not info:
+        raise Exception('Please init your git user.email by: git config --global user.email "you@example.com"')
+    try:
+        info = sys_call('git config --get user.name', showcmd=False, printScreen=False)
+    except Exception as e:
+        err = e
+    if err or not info:
+        raise Exception('Please init your git user.name by: git config --global user.name "Your Name"')
 
 
 def git_init():
@@ -45,6 +62,8 @@ def git_check():
 
     if not git_check_repo_clean():
         raise Exception('git directory dirty')
+
+    git_ensure_username_and_email()
 
 
 def get_time_now_str():
@@ -68,8 +87,8 @@ def sync():
     Log('shells: ', shells)
 
     git_init()
+    git_check()
     try:
-        git_check()
 
         Log('==> [ pull history from origin ]')
         sys_call('git fetch origin')
@@ -100,9 +119,12 @@ def sync():
     except Exception as e:
         LogError('[Error while syncing]')
         try:
+            Log('cleanup git...')
+            if git_check_repo_bare():
+                sys_call('git rm -r -f --cached .')
             sys_call('git clean -d -f')
             sys_call('git reset --hard master')
-        except Exception as e:
+        except Exception as e1:
             pass
         raise e
 
