@@ -91,7 +91,7 @@ settings store in `settings.py`
 | BACKUP_DIR                 | old history backup dir               | no       | backup       |
 | ${SHELL_NAME}_HISTORY_FILE | directory of your shell history      | no       | ...          |
 | LAST_UPDATE_FILE_NAME      | file name of last update time record | no       | .last_update |
-| UPDATE_PERIOD              | time period of history sync          | no       | 7 days       |
+| UPDATE_PERIOD              | time period of auto sync             | no       | 7 days       |
 
 example file of `settings.py`, you can find this text under `settings_default.py`
 ```python

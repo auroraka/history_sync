@@ -23,9 +23,9 @@ def git_check_branch_master():
     return 'On branch master' in info
 
 
-def git_check_repo_exists():
+def git_check_repo_exists(repo):
     info = sys_call('git remote -v | grep origin', showcmd=False, printScreen=False)
-    return info.split('\n')[0].split(' ')[0].split('\t')[1] == settings.HISTORY_REPO
+    return info.split('\n')[0].split(' ')[0].split('\t')[1] == repo
 
 
 def git_ensure_username_and_email():
@@ -45,23 +45,20 @@ def git_ensure_username_and_email():
         raise Exception('Please init your git user.name by: git config --global user.name "Your Name"')
 
 
-def git_init():
-    if not os.path.exists(full_path(settings.HISTORY_DIR)):
-        sys_call('git clone %s %s' % (settings.HISTORY_REPO, full_path(settings.HISTORY_DIR)), showcmd=True)
-    git_dir = full_path(settings.HISTORY_DIR)
+def git_init(repo, repo_dir):
+    git_dir = full_path(repo_dir)
+    if not os.path.exists(git_dir):
+        sys_call('git clone %s %s' % (repo, git_dir), showcmd=True)
     os.chdir(git_dir)
 
 
-def git_check():
-    if not git_check_repo_exists():
-        msg = 'repo %s not found in directory: %s' % (settings.HISTORY_REPO, settings.HISTORY_DIR)
+def git_check(repo, repo_dir):
+    if not git_check_repo_exists(repo):
+        msg = 'repo %s not found in directory: %s' % (repo, repo_dir)
         raise Exception(msg)
 
     if not git_check_branch_master():
         raise Exception('not on branch master')
-
-    if not git_check_repo_clean():
-        raise Exception('git directory dirty')
 
     git_ensure_username_and_email()
 
@@ -80,14 +77,44 @@ def get_shells():
     return [s for s in shells if s]
 
 
+def self_update():
+    Log('[ history_sync self update... ]')
+    running_dir = os.getcwd()
+    git_init(settings.THIS_REPO, settings.THIS_DIR)
+    git_check(settings.THIS_REPO, settings.THIS_DIR)
+    if git_check_repo_clean():
+        try:
+            sys_call('git fetch --all', showcmd=True)
+            sys_call('git rebase origin/master', showcmd=True)
+            sys_call('git push origin master', showcmd=True)
+        except Exception as e:
+            LogError('[Error while self update]')
+            try:
+                Log('cleanup git...')
+                if git_check_repo_bare():
+                    sys_call('git rm -r -f --cached .')
+                sys_call('git clean -d -f')
+                sys_call('git reset --hard master')
+            except Exception as e1:
+                pass
+    else:
+        LogError('[ self update failed, please commit your changes first ]')
+
+    os.chdir(running_dir)
+
+
 def sync():
     make_default_settings()
+    self_update()
 
     shells = sys.argv[1:] if len(sys.argv) > 1 else get_shells()
     Log('shells: ', shells)
 
-    git_init()
-    git_check()
+    git_init(settings.HISTORY_REPO, settings.HISTORY_DIR)
+    git_check(settings.HISTORY_REPO, settings.HISTORY_DIR)
+    if not git_check_repo_clean():
+        raise Exception('git directory dirty')
+
     try:
 
         Log('==> [ pull history from origin ]')
