@@ -1,5 +1,8 @@
 import subprocess
 import os
+import settings_example
+import settings
+import inspect
 
 
 def full_path(path):
@@ -48,3 +51,14 @@ def underline_to_camel(underline_format):
         for _s_ in underline_format.split('_'):
             camel_format += _s_.capitalize()
     return camel_format
+
+
+def make_default_settings():
+    default_settings = [(x, getattr(settings_example, x)) for x in dir(settings_example) if x.isupper()]
+    for k, v in default_settings:
+        if not hasattr(settings, k):
+            setattr(settings, k,v)
+
+
+if __name__ == '__main__':
+    make_default_settings()

@@ -75,18 +75,21 @@ you can add more shell by inherit `History` class in history.py , and realize `_
 you can add plugins before/after merge, and register by change attribute `_before_merge_actions`,`_after_merge_actions` of History class.
 
 
-#### <a name="settings></a> "Settings
+#### Settings
+<a name="setting"></a>
 settings store in `settings.py`
 
-- HISTORY_REPO: repo to store history
-- HISTORY_DIR: repo directory
-- HISTORY_FILE_NAME: history file name
-- BACKUP_DIR: old history backup dir
-- ${SHELL_NAME}_FILE: directory of your shell history
-- LAST_UPDATE_FILE_NAME: file name of last update time record
-- UPDATE_PERIOD: time period of history sync
+| variable_name              | meaning                              | required | default      |
+|----------------------------|--------------------------------------|----------|--------------|
+| HISTORY_REPO               | repo to store history                | yes      | #            |
+| HISTORY_DIR                | repo directory                       | yes      | #            |
+| HISTORY_FILE_NAME          | history file name                    | no       | history      |
+| BACKUP_DIR                 | old history backup dir               | no       | backup       |
+| ${SHELL_NAME}_HISTORY_FILE | directory of your shell history      | no       | ...          |
+| LAST_UPDATE_FILE_NAME      | file name of last update time record | no       | .last_update |
+| UPDATE_PERIOD              | time period of history sync          | no       | 7 days       |
 
-example file of `settings.py`, you can find this text under `settings.py.example`
+example file of `settings.py`, you can find this text under `settings_example.py`
 ```python
 from datetime import timedelta
 
