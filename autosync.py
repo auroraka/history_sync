@@ -5,7 +5,8 @@ from datetime import datetime
 from sync import sync
 import tools
 
-if __name__ == '__main__':
+
+def auto_sync():
     tools.make_default_settings()
     record_file = os.path.join(os.path.dirname(__file__), settings.LAST_UPDATE_FILE_NAME)
     if not os.path.exists(record_file):
@@ -23,3 +24,7 @@ if __name__ == '__main__':
             sync()
     with open(record_file, 'w') as f:
         f.write(str(datetime.now().timestamp()))
+
+
+if __name__ == '__main__':
+    auto_sync()
