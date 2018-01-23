@@ -30,6 +30,9 @@ def git_check_repo_exists():
 
 
 def git_check():
+    if not os.path.exists(settings.HISTORY_DIR):
+        sys_call('git clone %s %s' % (settings.HISTORY_REPO, settings.HISTORY_DIR), showcmd=True)
+
     if not git_check_repo_exists():
         msg = 'repo %s not found in directory: %s' % (settings.HISTORY_REPO, settings.HISTORY_DIR)
         raise Exception(msg)
