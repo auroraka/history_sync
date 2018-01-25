@@ -140,6 +140,7 @@ def sync():
                                cls2=History)
 
         for shell in shells:
+            Log('[ update history %s... ]' % shell)
             ShellHistory = globals()[shell.capitalize() + 'History']
             shell_his_dir = ShellHistory._get_history_dir()
             if not os.path.exists(shell_his_dir):

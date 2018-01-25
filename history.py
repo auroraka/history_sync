@@ -11,7 +11,8 @@ class History:
     DEFAULT_HISTORY_FILE = '~/.my_history/history'
     _SEPARATOR = '\n'
     _before_merge_actions = [filter_white_line_action]
-    _after_merge_actions = [unique_action, delete_password_action, limit_length_action]
+    _after_merge_actions = [unique_action, unique_cmd_action, delete_password_action, limit_length_action,
+                            filter_invalid]
 
     _DEFAULT_TIME = datetime.fromtimestamp(1)
 
@@ -73,14 +74,16 @@ class History:
     @classmethod
     def _convert_text(cls, text1, cls1=None):
         histories = cls1._parse_text(text1, cls)
+        histories_save = [h for h in histories]
 
-        for func in cls._before_merge_actions:
-            histories = func(histories)
-        for func in cls._after_merge_actions:
-            histories = func(histories)
-        histories = cls._sort(histories)
+        # for func in cls._before_merge_actions:
+        #     histories_save = func(histories_save)
+        # for func in cls._after_merge_actions:
+        #     histories_save = func(histories_save)
+        # histories_save = cls._sort(histories_save)
 
-        text_save = cls._SEPARATOR.join([h.__str__() for h in histories]) + cls._SEPARATOR
+        text_save = cls._SEPARATOR.join([h.__str__() for h in histories_save]) + cls._SEPARATOR
+        tools.Log('%s(%s) => %s(%s)' % (cls1.__name__, len(histories), cls.__name__, len(histories_save)))
         return text_save
 
     @classmethod
@@ -138,7 +141,6 @@ class BashHistory(History):
 
 class ZshHistory(History):
     DEFAULT_HISTORY_FILE = '~/.zsh_history'
-    _after_merge_actions = History._after_merge_actions + [unique_cmd_action]
 
     @staticmethod
     def _parse_text(text, aim_cls=None):
@@ -212,7 +214,8 @@ class FishHistory(History):
 if __name__ == '__main__':
     # History.merge_file('test/za', 'test/fb', 'test/co', cls1=ZshHistory, cls2=FishHistory)
     # ZshHistory.merge_file('test/a', 'test/b', 'test/c')
-    ZshHistory.convert_file('test/a', 'test/c')
+    # BashHistory.merge_file('test/a', 'test/b', 'test/c')
+    # ZshHistory.convert_file('test/a', 'test/c')
     # with open('test/co') as f:
     #     hs = History._parse_text(f.read())
     #     for h in hs:
@@ -222,4 +225,7 @@ if __name__ == '__main__':
     # print(History._get_history_dir())
     # print(ZshHistory._get_history_dir())
     # print(FishHistory._get_history_dir())
+    BashHistory.convert_file(tools.full_path('~/.my_history/history'), 'test/bash_history', cls1=History)
+    # BashHistory.merge_file('test/bash_history', tools.full_path('~/.my_history/history'), 'test/bash_history',
+    #                        cls1=BashHistory, cls2=History)
     pass
