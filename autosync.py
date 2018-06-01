@@ -21,8 +21,8 @@ def auto_sync():
         if shall:
             tools.Log('[ start history syncing... ]')
             sync()
-    with open(record_file, 'w') as f:
-        f.write(str(datetime.now().timestamp()))
+        with open(record_file, 'w') as f:
+            f.write(str(datetime.now().timestamp()))
 
 
 if __name__ == '__main__':

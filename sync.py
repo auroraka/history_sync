@@ -98,7 +98,7 @@ def self_update():
             except Exception as e1:
                 pass
     else:
-        LogError('[ self update failed, please commit your changes first ]')
+        raise Exception('[ self update failed, please commit your changes first ]')
 
     os.chdir(running_dir)
 
