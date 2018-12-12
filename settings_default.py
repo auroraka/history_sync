@@ -11,7 +11,7 @@ ZSH_HISTORY_FILE = '~/.zsh_history'
 FISH_HISTORY_FILE = '~/.local/share/fish/fish_history'
 
 LAST_UPDATE_FILE_NAME = '.last_update'
-UPDATE_PERIOD = timedelta(days=3)
+UPDATE_PERIOD = timedelta(days=14)
 
 THIS_REPO = 'git@github.com:auroraka/history_sync.git'
 THIS_DIR = '~/.history_sync'
