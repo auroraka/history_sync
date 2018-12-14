@@ -7,9 +7,10 @@ from sync import sync
 
 def auto_sync():
     tools.make_default_settings()
-    record_file = settings.LAST_UPDATE_FILE_NAME
+    record_file = os.path.expanduser(settings.LAST_UPDATE_FILE_NAME)
     if not os.path.exists(record_file):
-        os.makedirs(os.path.dirname(record_file))
+        print('create record_file')
+        os.makedirs(os.path.dirname(record_file), exist_ok=True)
         open(record_file, 'a').close()
     with open(record_file) as f:
         try:
