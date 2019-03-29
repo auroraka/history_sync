@@ -19,7 +19,8 @@ def auto_sync():
             tools.Log('no record file found, create one')
             last_update_time = datetime.fromtimestamp(0)
     if datetime.now() - last_update_time > settings.UPDATE_PERIOD:
-        shall = input("sync history? (y/N) ").lower() == 'y'
+        #shall = input("sync history? (y/N) ").lower() == 'y'
+        shall=True
         if shall:
             tools.Log('[ start history syncing... ]')
             sync()
