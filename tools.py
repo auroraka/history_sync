@@ -35,6 +35,11 @@ def LogError(info, *args, **kwarg):
     print(info, *args, **kwarg)
 
 
+def LogWarning(info, *args, **kwarg):
+    print('[Warning]')
+    print(info, *args, **kwarg)
+
+
 def Log(*args, **kwarg):
     print(*args, **kwarg)
 

@@ -53,14 +53,18 @@ def git_init(repo, repo_dir):
 
 
 def git_check(repo, repo_dir):
+    git_ensure_username_and_email()
+
     if not git_check_repo_exists(repo):
         msg = 'repo %s not found in directory: %s' % (repo, repo_dir)
         raise Exception(msg)
 
-    if not git_check_branch_master():
-        raise Exception('not on branch master')
+    if not git_check_repo_clean():
+        raise Exception('[ self update failed, please commit your changes first ]')
 
-    git_ensure_username_and_email()
+    if not git_check_branch_master():
+        LogWarning('not on branch master, will checkout to master first...')
+        sys_call('git checkout master', showcmd=True)
 
 
 def get_time_now_str():
@@ -82,23 +86,20 @@ def self_update():
     running_dir = os.getcwd()
     git_init(settings.THIS_REPO, settings.THIS_DIR)
     git_check(settings.THIS_REPO, settings.THIS_DIR)
-    if git_check_repo_clean():
+    try:
+        sys_call('git fetch --all', showcmd=True)
+        sys_call('git rebase origin/master', showcmd=True)
+        sys_call('git push origin master', showcmd=True)
+    except Exception as e:
+        LogError('[Error while self update]')
         try:
-            sys_call('git fetch --all', showcmd=True)
-            sys_call('git rebase origin/master', showcmd=True)
-            sys_call('git push origin master', showcmd=True)
-        except Exception as e:
-            LogError('[Error while self update]')
-            try:
-                Log('cleanup git...')
-                if git_check_repo_bare():
-                    sys_call('git rm -r -f --cached .')
-                sys_call('git clean -d -f')
-                sys_call('git reset --hard master')
-            except Exception as e1:
-                pass
-    else:
-        raise Exception('[ self update failed, please commit your changes first ]')
+            Log('cleanup git...')
+            if git_check_repo_bare():
+                sys_call('git rm -r -f --cached .')
+            sys_call('git clean -d -f')
+            sys_call('git reset --hard master')
+        except Exception as e1:
+            pass
 
     os.chdir(running_dir)
 
@@ -134,10 +135,8 @@ def sync():
             if not os.path.exists(shell_his_dir):
                 Log('%s shell history does not exist' % shell)
                 continue
-            shutil.copy(shell_his_dir,
-                        os.path.join(settings.BACKUP_DIR, shell + '_history.' + get_time_now_str()))
-            History.merge_file(shell_his_dir, settings.HISTORY_FILE_NAME, settings.HISTORY_FILE_NAME, cls1=ShellHistory,
-                               cls2=History)
+            shutil.copy(shell_his_dir, os.path.join(settings.BACKUP_DIR, shell + '_history.' + get_time_now_str()))
+            History.merge_file(shell_his_dir, settings.HISTORY_FILE_NAME, settings.HISTORY_FILE_NAME, cls1=ShellHistory, cls2=History)
 
         for shell in shells:
             Log('[ update history %s... ]' % shell)
