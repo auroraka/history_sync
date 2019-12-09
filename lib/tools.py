@@ -1,19 +1,7 @@
 import subprocess
 import os
 
-try:
-    import settings
-except ImportError as e:
-    settings_file = os.path.join(os.path.dirname(__file__), 'settings.py')
-    if not os.path.exists(settings_file):
-        open(settings_file, 'a').close()
-        import settings
-    else:
-        raise e
-try:
-    import settings_default
-except ImportError:
-    raise Exception('Error: setting_default.py must exist')
+ROOT_PATH = os.path.dirname(os.path.join(__file__, '../'))
 
 
 def touch_file(file):
@@ -71,14 +59,3 @@ def underline_to_camel(underline_format):
         for _s_ in underline_format.split('_'):
             camel_format += _s_.capitalize()
     return camel_format
-
-
-def make_default_settings():
-    default_settings = [(x, getattr(settings_default, x)) for x in dir(settings_default) if x.isupper()]
-    for k, v in default_settings:
-        if not hasattr(settings, k):
-            setattr(settings, k, v)
-
-
-if __name__ == '__main__':
-    make_default_settings()

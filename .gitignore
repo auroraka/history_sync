@@ -4,3 +4,4 @@ __pycache__
 .last_update
 settings.py
 *.pyc
+.vscode
