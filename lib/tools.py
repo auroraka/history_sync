@@ -32,6 +32,17 @@ def Log(*args, **kwarg):
     print(*args, **kwarg)
 
 
+def LogFile(file_path, *args, **kwarg):
+    f = open(file_path, 'a')
+    kwarg.update({'file': f})
+    print(*args, **kwarg)
+    f.close()
+
+
+def LogTFile(*args, **kwarg):
+    LogFile('tmp.txt', *args, **kwarg)
+
+
 def sys_call(cmd, showcmd=False, printScreen=True):
     if showcmd:
         Log('==>', cmd)

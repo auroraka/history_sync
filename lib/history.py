@@ -9,6 +9,13 @@ import lib.tools as tools
 import lib.action as act
 import conf.settings as settings
 from lib.tools import Log
+from lib.history_base import HistoryObj
+
+'''
+Usage:
+HistoryMergeHelper.format_file(file_path, save_path)
+HistoryMergeHelper.merge_file(file1_path, file2_path, save_path)
+'''
 
 '''
 ref: .zsh_history format:
@@ -17,37 +24,6 @@ ref: .zsh_history format:
 
 <elapsed seconds> will always be 0, if the INC_APPEND_HISTORY option is set
 '''
-
-
-class HistoryObj:
-    _DEFAULT_TIME = datetime.fromtimestamp(1)
-
-    def __init__(self, cmd='', time=_DEFAULT_TIME, duration=0, paths=None):
-
-        if paths is None:
-            paths = []
-        self.cmd = cmd
-        self.time = time
-        self.duration = duration  # duration is always 0
-        self.paths = paths
-
-    def __str__(self):
-        return ': %s:%s;%s' % (int(self.time.timestamp()), int(self.duration), self.cmd)
-
-    def __eq__(self, other):
-        return self.cmd == other.cmd and self.time == other.time
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __hash__(self):
-        return hash((self.time, self.cmd))
-
-    def _print_debug_string(self):
-        print(self._debug_string())
-
-    def _debug_string(self):
-        return 'time: {}\ncmd: \'{}\'\n'.format(self.time, self.cmd)
 
 
 class HistoryMergeHelper:
@@ -59,7 +35,9 @@ class HistoryMergeHelper:
         act.action_unique_cmd,
         act.action_delete_password,
         act.action_limit_length,
-        act.action_filter_invalid
+        act.action_limit_cmd_lines,
+        act.action_filter_invalid_cmd,
+        act.action_filter_invalid_time,
     ]
 
     @classmethod
@@ -87,7 +65,8 @@ class HistoryMergeHelper:
 
     @staticmethod
     def _sort(histories):
-        return sorted(histories, key=attrgetter('time', 'cmd'))
+        # return sorted(histories, key=attrgetter('time', 'cmd'))
+        return sorted(histories, key=attrgetter('cmd', 'time'))
 
     @staticmethod
     def _text2objs(text):
@@ -118,17 +97,27 @@ class HistoryMergeHelper:
         return '\n'.join([h.__str__() for h in objs]) + '\n'
 
     @classmethod
+    def _open_file(cls, file):
+        # file can be None
+        if file is not None:
+            with codecs.open(file, 'r', encoding='utf-8', errors='ignore') as f:
+                text = f.read()
+        else:
+            text = None
+        return text
+
+    @classmethod
     def merge_text(cls, text1, text2):
         objs1 = cls._text2objs(text1)
-        if text2 is not None:
-            objs2 = cls._text2objs(text2)
-        else:
-            objs2 = []
+        objs2 = cls._text2objs(text2) if text2 is not None else []
         objs_save = cls._merge_history(objs1, objs2)
 
         text_save = cls._objs2text(objs_save)
         inc_cnt = len(objs_save)-(len(objs1)+len(objs2))
-        Log('{} + {} => {}({:+d})'.format(len(objs1), len(objs2), len(objs_save), inc_cnt))
+        if text2 is not None:
+            Log('{} + {} => {}({:+d})'.format(len(objs1), len(objs2), len(objs_save), inc_cnt))
+        else:
+            Log('{} => {}({:+d})'.format(len(objs1), len(objs_save), inc_cnt))
         return text_save
 
     @classmethod
@@ -136,14 +125,10 @@ class HistoryMergeHelper:
         if not osp.exists(file_save):
             open(file_save, 'w').close()
 
-        with codecs.open(file1, 'r', encoding='utf-8', errors='ignore') as f:
-            text1 = f.read()
-        if file2 is not None:
-            with codecs.open(file2, 'r', encoding='utf-8', errors='ignore') as f:
-                text2 = f.read()
-            text_save = cls.merge_text(text1, text2)
-        else:
-            text_save = cls.merge_text(text1, None)
+        text1 = cls._open_file(file1)
+        text2 = cls._open_file(file2)
+
+        text_save = cls.merge_text(text1, text2)
         with open(file_save, 'w') as f:
             f.write(text_save)
 
@@ -176,6 +161,8 @@ def _test():
             print()
             # time.sleep(0.5)
             cnt += 1
+            if (cnt > 0):
+                break
             if (cnt > 100):
                 pass
 
