@@ -81,7 +81,7 @@ class Rule:
     def __init__(self, match_method, key):
         self.match_method = match_method
         self.key = key
-        # Log('[rule] add method:{} key:{}'.format(match_method, key))
+        # Log('[rule] add method:{} key:{}'.format(match_method, repr(key)))
 
     def matched(self, cmd):
         return MatchMethod.MATCH_FUNC_MAP[self.match_method](cmd, self.key)
@@ -153,6 +153,7 @@ class Cleaner:
             else:
                 new_objs.append(obj)
 
+        new_objs = HistoryMergeHelper._sort_by_time(new_objs)
         new_text = HistoryMergeHelper._objs2text(new_objs)
         with open(self.save_path, 'w') as f:
             f.write(new_text)
@@ -188,7 +189,7 @@ def parse_arg():
 
     # check cmd
     args.cmd = ' '.join(args.cmd)
-    if len(args.cmd) == 0 and args.rule_config is None:
+    if not args.cmd and (not args.rule_config and not args.default_rule):
         Log('error empty cmd')
         sys.exit(0)
 
@@ -220,6 +221,7 @@ def parse_arg():
     # check debug
     DEBUG_PATH = 'debug.txt'
     if args.debug:
+        # HistoryMergeHelper._sort_by_time = HistoryMergeHelper._sort_by_cmd
         Log('----- DEBUG MODE -----')
         args.output = DEBUG_PATH
 

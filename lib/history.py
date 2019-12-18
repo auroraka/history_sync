@@ -15,11 +15,8 @@ from lib.history_base import HistoryObj
 Usage:
 HistoryMergeHelper.format_file(file_path, save_path)
 HistoryMergeHelper.merge_file(file1_path, file2_path, save_path)
-'''
 
-'''
-ref: .zsh_history format:
-
+Zsh History Format Reference:
 : <beginning time>:<elapsed seconds>;<command>
 
 <elapsed seconds> will always be 0, if the INC_APPEND_HISTORY option is set
@@ -30,14 +27,17 @@ class HistoryMergeHelper:
     DEFAULT_HISTORY_FILE = '~/.zsh_history'
     _before_merge_actions = []
     _after_merge_actions = [
+        act.action_strip_cmd,
         act.action_filter_empty_cmd,
         act.action_unique,
         act.action_unique_cmd,
-        act.action_delete_password,
         act.action_limit_length,
         act.action_limit_cmd_lines,
         act.action_filter_invalid_cmd,
         act.action_filter_invalid_time,
+
+        act.action_delete_password,
+        act.action_keep_only_one_for_no_time_cmd,
     ]
 
     @classmethod
@@ -58,14 +58,16 @@ class HistoryMergeHelper:
             cnt = len(objs_save)
             objs_save = func(objs_save)
             cnt2 = len(objs_save)
-            if True:
-                inc_cnt = cnt2-cnt
-                Log('{:30}: {} -> {}({:d})'.format(func.__name__, cnt, cnt2, inc_cnt))
-        return cls._sort(objs_save)
+            inc_cnt = cnt2-cnt
+            # Log('{:30}: {} -> {}({:d})'.format(func.__name__, cnt, cnt2, inc_cnt))
+        return cls._sort_by_time(objs_save)
 
     @staticmethod
-    def _sort(histories):
-        # return sorted(histories, key=attrgetter('time', 'cmd'))
+    def _sort_by_time(histories):
+        return sorted(histories, key=attrgetter('time', 'cmd'))
+
+    @staticmethod
+    def _sort_by_cmd(histories):
         return sorted(histories, key=attrgetter('cmd', 'time'))
 
     @staticmethod
@@ -89,7 +91,7 @@ class HistoryMergeHelper:
                 duration, cmd = x[2].split(";", 1)
                 objs.append(HistoryObj(cmd=cmd, time=datetime.fromtimestamp(time), duration=int(duration)))
             except:
-                print('[Error while parse]: %s' % line)
+                Log('[Error while parse]: %s' % line)
         return objs
 
     @classmethod
@@ -98,7 +100,7 @@ class HistoryMergeHelper:
 
     @classmethod
     def _open_file(cls, file):
-        # file can be None
+        # notice that file can be None
         if file is not None:
             with codecs.open(file, 'r', encoding='utf-8', errors='ignore') as f:
                 text = f.read()
@@ -135,37 +137,3 @@ class HistoryMergeHelper:
     @classmethod
     def format_file(cls, file, file_save):
         cls.merge_file(file, None, file_save)
-
-
-def _test():
-    # with open('test/a.zsh_history', 'r') as f:
-    #     t = f.read()
-    # objs = HistoryMergeHelper._text2objs(t)
-    # for h in objs:
-    #     h._print_debug_string()
-    # return objs
-    # HistoryMergeHelper.format_file('test/a.txt', 'test/b.txt')
-
-    # HistoryMergeHelper.format_file('test/zsh_history.2019-12-02-35', 'test/c.txt')
-
-    import os
-    import os.path as osp
-    base_dir = 'my_history/backup'
-    summary = 'summary.txt'
-    cnt = 0
-    open(summary, 'w').close()
-    for f in os.listdir(base_dir):
-        if f.startswith('zsh'):
-            file_path = osp.join(base_dir, f)
-            HistoryMergeHelper.merge_file(file_path, summary, summary)
-            print()
-            # time.sleep(0.5)
-            cnt += 1
-            if (cnt > 0):
-                break
-            if (cnt > 100):
-                pass
-
-
-if __name__ == '__main__':
-    _test()

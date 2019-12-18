@@ -1,0 +1,145 @@
+_START
+#
+
+_START
+'
+
+_START
+"
+
+_START // 空格
+ 
+_START // tab
+	
+
+_START // ^[
+
+
+_START
+!
+
+_START
+-
+
+_START
+$
+
+_START
+(
+
+_START
+%
+
+_START
+&
+
+_START
+)
+
+_START
++
+
+_START
+,
+
+_START // .+[空格]
+. 
+
+_START
+*
+
+_CONTAINS
+。
+
+_CONTAINS
+momenta
+
+_START
+¬
+
+_START
+⃴
+
+_FULL
+佃考＃七趃天
+
+_FULL
+好
+
+_FULL
+惽溃＃简书
+
+_FULL
+沃郸大伃(2).xlsx
+
+_FULL
+郳惮＃https://www.jianshu.com/p/cae9a3b02d9d
+
+_CONTAINS
+惯烴
+
+_CONTAINS
+水雾
+
+_CONTAINS
+水郻
+
+_CONTAINS
+欃乃谷
+
+_END
+EOF
+
+_START
+rosservice
+
+_START
+rosbag info 2
+
+_START
+rosbag info /
+
+_START
+rosbag info e
+
+_CONTAINS
+惽天龃
+
+_CONTAINS
+tanya -p
+
+_CONTAINS
+tanyareadonly -p
+
+_CONTAINS
+tanya_test_master -p
+
+_CONTAINS
+buffer-db -p
+
+_CONTAINS
+admin -p
+
+_CONTAINS
+doramaster -p
+
+_CONTAINS
+nova_readonly -p
+
+_CONTAINS
+root -p
+
+_CONTAINS
+dms_master -p
+
+_START
+mongo mongodb://tanya_test_master:
+
+_START
+mongo mongodb://tanya:
+
+_CONTAINS
+对広
+
+_CMD_USE
+history_clean

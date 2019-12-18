@@ -4,6 +4,12 @@ import re
 from lib.history_base import HistoryObj
 
 
+def action_strip_cmd(objs):
+    for i, h in enumerate(objs):
+        objs[i].cmd = h.cmd.strip()
+    return objs
+
+
 def action_filter_empty_cmd(objs):
     return [h for h in objs if h.cmd]
 
@@ -49,4 +55,21 @@ def action_filter_invalid_time(objs):
     for i, h in enumerate(objs):
         if h.time.timestamp() < 0:
             objs[i].time = HistoryObj._DEFAULT_TIME
+        if h.time.timestamp() <= 28801:
+            objs[i].time = HistoryObj._DEFAULT_TIME
     return objs
+
+
+def action_keep_only_one_for_no_time_cmd(objs):
+    objs = sorted(objs, key=attrgetter('time', 'cmd'))
+    new_objs = []
+    no_time_objs = {}
+    for h in objs:
+        if h.time == HistoryObj._DEFAULT_TIME:
+            key = h.cmd.split(' ')[0]
+            if key not in no_time_objs:
+                no_time_objs[key] = h
+        else:
+            new_objs.append(h)
+    new_objs += list(no_time_objs.values())
+    return new_objs
