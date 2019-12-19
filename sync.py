@@ -9,6 +9,7 @@ from datetime import datetime
 from lib.tools import Log, LogError, sys_call, full_path, touch_file
 import conf.settings as settings
 from lib.history import HistoryMergeHelper
+from cleaner import Cleaner
 import lib.git_helper as git
 
 
@@ -72,6 +73,7 @@ def sync():
 
         Log('[ merge history file... ]')
         HistoryMergeHelper.merge_file(zsh_history, settings.HISTORY_FILE_NAME, zsh_history)
+        Cleaner(use_default_rule=True).clean()
         shutil.copy(zsh_history, settings.HISTORY_FILE_NAME)
 
         Log('[ backup after sync... ]')

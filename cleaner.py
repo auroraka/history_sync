@@ -7,7 +7,7 @@ import os.path as osp
 
 import conf.settings as settings
 from lib.history import HistoryMergeHelper
-from lib.tools import Log, LogTFile, LogFile
+from lib.tools import Log, LogTFile, LogFile, full_path
 
 
 def match_full(cmd, key):
@@ -88,13 +88,50 @@ class Rule:
 
 
 class Cleaner:
-    def __init__(self, key, match_method, rule_path, history_path, save_path):
+    def _check_param(self):
+        # check key, match_method
+        if not(self.rule_path or self.use_default_rule):
+            if not self.key:
+                Log('error empty key/cmd')
+                sys.exit(0)
+            if not self.match_method:
+                Log('error empty match method')
+                sys.exit(0)
+
+        # check match
+        if MatchMethod._upper(self.match_method) not in MatchMethod.LIST:
+            Log('invalid match method: {}'.format(self.match_method))
+            sys.exit(0)
+        else:
+            self.match_method = MatchMethod._upper(self.match_method)
+
+        # check rule
+        if self.use_default_rule:
+            self.rule_path = full_path(settings.CLEAN_RULE_FILE)
+        if not self.rule_path or not osp.exists(self.rule_path):
+            Log('error cannot open rule config file: {}'.format(self.rule_path))
+            sys.exit(0)
+
+        # check history_path
+        self.history_path = full_path(self.history_path)
+        if not osp.exists(self.history_path):
+            Log('error cannot open history file: {}'.format(self.history_path))
+            sys.exit(0)
+
+        # check output_path
+        if not self.save_path:
+            self.save_path = self.history_path
+        self.save_path = full_path(self.save_path)
+
+    def __init__(self, key=None, match_method=None, rule_path=None, use_default_rule=None, history_path=None, save_path=None):
         self.key = key
         self.rule_path = rule_path
+        self.use_default_rule = use_default_rule
         self.history_path = history_path
         self.save_path = save_path
         self.match_method = match_method
         self.rules = []
+        self._check_param()
 
     def _get_last_cmd(self, lines):
         i = len(lines)-1
@@ -176,52 +213,23 @@ def parse_arg():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=textwrap.dedent(USAGE))
     parser.add_argument('cmd', nargs="*", help='cmd')
 
-    # choose one of three
+    # choose one from three
     g = parser.add_mutually_exclusive_group()
     g.add_argument('-m', '--match',  default=MatchMethod.FULL, help='matching method[{}], default={}'.format(','.join(MatchMethod.LIST_LOWER), MatchMethod.FULL_IGNORE_QUOTA))
     g.add_argument('-c', '--rule_config',  default=None, help='rule config file path')
-    g.add_argument('-r', '--default_rule', action="store_true", help="use default rule file")
+    g.add_argument('-r', '--use_default_rule', action="store_true", help="use default rule file")
 
     parser.add_argument('-p', '--history_path', default=osp.expanduser(settings.ZSH_HISTORY_FILE), help='history file path, default ~/.zsh_history')
     parser.add_argument('-o', '--output', help='output path, default same as history_path')
     parser.add_argument('-d', '--debug', action="store_true", help="debug")
     args = parser.parse_args()
 
-    # check cmd
-    args.cmd = ' '.join(args.cmd)
-    if not args.cmd and (not args.rule_config and not args.default_rule):
-        Log('error empty cmd')
-        sys.exit(0)
-
-    # check match
-    if MatchMethod._upper(args.match) not in MatchMethod.LIST:
-        Log('invalid match method: {}'.format(args.match))
-        sys.exit(0)
-    else:
-        args.match = MatchMethod._upper(args.match)
-
-    # check rule
-    if args.default_rule:
-        args.rule_config = osp.expanduser(settings.CLEAN_RULE_FILE)
-    else:
-        if args.rule_config is not None:
-            if not osp.exists(args.rule_config):
-                Log('error cannot open rule config file: {}'.format(args.rule_config))
-                sys.exit(0)
-
-    # check history_path
-    if not osp.exists(args.history_path):
-        Log('error cannot open history file: {}'.format(args.history_path))
-        sys.exit(0)
-
-    # check output_path
-    if args.output is None:
-        args.output = args.history_path
+    args.key = ' '.join(args.cmd)
 
     # check debug
     DEBUG_PATH = 'debug.txt'
     if args.debug:
-        # HistoryMergeHelper._sort_by_time = HistoryMergeHelper._sort_by_cmd
+        HistoryMergeHelper._sort_by_time = HistoryMergeHelper._sort_by_cmd
         Log('----- DEBUG MODE -----')
         args.output = DEBUG_PATH
 
@@ -231,11 +239,12 @@ def parse_arg():
 def main():
     args = parse_arg()
     c = Cleaner(
-        args.cmd,
-        args.match,
-        args.rule_config,
-        args.history_path,
-        args.output,
+        key=args.key,
+        match_method=args.match,
+        rule_path=args.rule_config,
+        use_default_rule=args.use_default_rule,
+        history_path=args.history_path,
+        save_path=args.output,
     )
     c.clean()
 
