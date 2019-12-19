@@ -2,6 +2,6 @@
 test
 __pycache__
 .last_update
-settings_local.py
+conf/settings_local.py
 *.pyc
 .vscode
