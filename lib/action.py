@@ -43,11 +43,8 @@ def action_limit_cmd_lines(objs):
     return [h for h in objs if h.cmd.count('\n') <= LINES_LIMIT]
 
 
-def action_filter_invalid_cmd(objs):
-    objs = [h for h in objs if (': 1:0;' not in h.cmd)]
-    objs = [h for h in objs if not h.cmd.endswith('\\')]
-    r = re.compile(r'[\s\S]*: \d{10}:\d;[\s\S]*')
-    objs = [h for h in objs if not r.match(h.cmd)]
+def action_keep_only_acsii_cmd(objs):
+    objs = [h for h in objs if h.cmd.isascii()]
     return objs
 
 
@@ -73,3 +70,11 @@ def action_keep_only_one_for_no_time_cmd(objs):
             new_objs.append(h)
     new_objs += list(no_time_objs.values())
     return new_objs
+
+
+def action_sort_by_time(objs):
+    return sorted(objs, key=attrgetter('time', 'cmd'))
+
+
+def action_sort_by_cmd(objs):
+    return sorted(objs, key=attrgetter('cmd', 'time'))

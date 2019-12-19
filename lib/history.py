@@ -25,7 +25,8 @@ Zsh History Format Reference:
 
 class HistoryMergeHelper:
     DEFAULT_HISTORY_FILE = '~/.zsh_history'
-    _before_merge_actions = []
+    _before_merge_actions = [
+    ]
     _after_merge_actions = [
         act.action_strip_cmd,
         act.action_filter_empty_cmd,
@@ -33,11 +34,15 @@ class HistoryMergeHelper:
         act.action_unique_cmd,
         act.action_limit_length,
         act.action_limit_cmd_lines,
-        act.action_filter_invalid_cmd,
-        act.action_filter_invalid_time,
 
+
+        act.action_sort_by_time,
+        act.action_keep_only_acsii_cmd,
+        act.action_filter_invalid_time,
         act.action_delete_password,
-        act.action_keep_only_one_for_no_time_cmd,
+
+        act.action_keep_only_one_for_no_time_cmd,  # put back
+        act.action_sort_by_time,  # put last
     ]
 
     @classmethod
@@ -59,16 +64,17 @@ class HistoryMergeHelper:
             objs_save = func(objs_save)
             cnt2 = len(objs_save)
             inc_cnt = cnt2-cnt
-            # Log('{:30}: {} -> {}({:d})'.format(func.__name__, cnt, cnt2, inc_cnt))
-        return cls._sort_by_time(objs_save)
+            if settings.args.debug:
+                Log('{:30}: {} -> {}({:d})'.format(func.__name__, cnt, cnt2, inc_cnt))
+        return objs_save
 
     @staticmethod
-    def _sort_by_time(histories):
-        return sorted(histories, key=attrgetter('time', 'cmd'))
+    def _sort_by_time(objs):
+        return act.action_sort_by_time(objs)
 
     @staticmethod
-    def _sort_by_cmd(histories):
-        return sorted(histories, key=attrgetter('cmd', 'time'))
+    def _sort_by_cmd(objs):
+        return act.action_sort_by_cmd(objs)
 
     @staticmethod
     def _text2objs(text):
