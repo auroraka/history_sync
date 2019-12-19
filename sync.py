@@ -3,26 +3,17 @@ import shutil
 import sys
 import inspect
 import os
+import os.path as osp
 from datetime import datetime
 
 from lib.tools import Log, LogError, sys_call, full_path, touch_file
 import conf.settings as settings
-import lib.history as history
+from lib.history import HistoryMergeHelper
 import lib.git_helper as git
 
 
 def get_time_now_str():
-    return datetime.now().strftime('%Y-%m-%d-%S')
-
-
-def get_shells():
-    shells = []
-    for name in dir(history):
-        cls = getattr(history, name)
-        if 'history' in name.lower() and inspect.isclass(cls) and isinstance(cls(), history.History):
-            shells.append(name.lower().split('history')[0])
-
-    return [s for s in shells if s]
+    return datetime.now().strftime('%Y-%m-%d_%H-%M')
 
 
 def self_update():
@@ -51,12 +42,8 @@ def self_update():
 def sync():
     self_update()
 
-    # shells = sys.argv[1:] if len(sys.argv) > 1 else get_shells()
-    shells = ['zsh']
-    Log('shells: ', shells)
-
     # init history repo
-    git.git_init_history_repo(settings.HISTORY_REPO, settings.HISTORY_DIR)
+    git.git_init(settings.HISTORY_REPO, settings.HISTORY_DIR)
 
     # check git status all right
     git.git_check(settings.HISTORY_REPO, settings.HISTORY_DIR)
@@ -70,29 +57,27 @@ def sync():
         if not git.git_check_repo_bare():
             sys_call('git reset --hard origin/master')
 
-        Log('==> [ merge histories ]')
-        os.makedirs(full_path(settings.BACKUP_DIR), exist_ok=True)
+        Log('==> [ sync zsh_history ]')
+        os.makedirs(full_path(settings.BACKUP_BEFORE_DIR), exist_ok=True)
+        os.makedirs(full_path(settings.BACKUP_AFTER_DIR), exist_ok=True)
         if not os.path.exists(settings.HISTORY_FILE_NAME):
             touch_file(settings.HISTORY_FILE_NAME)
 
-        for shell in shells:
-            Log('[ merge %s... ]' % shell)
-            ShellHistory = globals()[shell.capitalize() + 'History']
-            shell_his_dir = ShellHistory._get_history_dir()
-            if not os.path.exists(shell_his_dir):
-                Log('%s shell history does not exist' % shell)
-                continue
-            shutil.copy(shell_his_dir, os.path.join(settings.BACKUP_DIR, shell + '_history.' + get_time_now_str()))
-            history.History.merge_file(shell_his_dir, settings.HISTORY_FILE_NAME, settings.HISTORY_FILE_NAME, cls1=ShellHistory, cls2=history.History)
+        zsh_history = full_path(settings.ZSH_HISTORY_FILE)
+        time_now_str = get_time_now_str()
 
-        for shell in shells:
-            Log('[ update history %s... ]' % shell)
-            ShellHistory = globals()[shell.capitalize() + 'History']
-            shell_his_dir = ShellHistory._get_history_dir()
-            if not os.path.exists(shell_his_dir):
-                Log('%s shell history does not exist' % shell)
-                continue
-            ShellHistory.convert_file(settings.HISTORY_FILE_NAME, shell_his_dir, cls1=history.History)
+        Log('[ backup before sync... ]')
+        backup_name = osp.join(settings.BACKUP_BEFORE_DIR, 'zsh_histroy.'+time_now_str)
+        shutil.copy(zsh_history, backup_name)
+
+        Log('[ merge history file... ]')
+        HistoryMergeHelper.merge_file(zsh_history, settings.HISTORY_FILE_NAME, zsh_history)
+        shutil.copy(zsh_history, settings.HISTORY_FILE_NAME)
+
+        Log('[ backup after sync... ]')
+        backup_name = osp.join(settings.BACKUP_BEFORE_DIR, 'zsh_histroy.'+time_now_str)
+        shutil.copy(zsh_history, backup_name)
+
     except Exception as e:
         LogError('[Error while syncing]')
         try:
@@ -106,10 +91,9 @@ def sync():
         raise e
 
     Log('==> [ push history to origin ]')
-    # sys_call('git add %s' % settings.HISTORY_FILE_NAME)
     sys_call('git add --all')
     if not git.git_check_repo_clean():
-        sys_call('git commit -m "%s save history: %s"' % (get_time_now_str(), shells))
+        sys_call('git commit -m "save history: {}"'.format(time_now_str))
         sys_call('git push origin master')
 
 

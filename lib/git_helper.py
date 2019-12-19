@@ -40,7 +40,7 @@ def git_ensure_username_and_email():
         raise Exception('Please init your git user.name by: git config --global user.name "Your Name"')
 
 
-def git_init_history_repo(repo, repo_dir):
+def git_init(repo, repo_dir):
     git_dir = full_path(repo_dir)
     if not os.path.exists(git_dir):
         sys_call('git clone %s %s' % (repo, git_dir), showcmd=True)
