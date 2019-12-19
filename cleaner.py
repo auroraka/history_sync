@@ -27,7 +27,7 @@ def match_contains(cmd, key):
 
 
 def match_cmd_use(cmd, key):
-    return cmd.split(' ')[0] == key
+    return cmd.split(' ')[0].split('/')[-1] == key
 
 
 def _ignore_quota(c):
