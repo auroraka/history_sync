@@ -106,7 +106,7 @@ class Cleaner:
         # check rule
         if self.use_default_rule:
             self.rule_path = full_path(settings.CLEAN_RULE_FILE)
-        if not self.rule_path or not osp.exists(self.rule_path):
+        if self.rule_path and not osp.exists(self.rule_path):
             Log('error cannot open rule config file: {}'.format(self.rule_path))
             sys.exit(0)
 
