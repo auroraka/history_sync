@@ -73,6 +73,7 @@ def sync():
 
         Log('[ merge history file... ]')
         HistoryMergeHelper.merge_file(zsh_history, settings.HISTORY_FILE_NAME, zsh_history)
+        Log('[ run history clean...')
         Cleaner(use_default_rule=True, history_path=full_path(settings.ZSH_HISTORY_FILE)).clean()
         shutil.copy(zsh_history, settings.HISTORY_FILE_NAME)
 
