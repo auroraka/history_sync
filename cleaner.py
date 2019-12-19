@@ -97,13 +97,11 @@ class Cleaner:
             if not self.match_method:
                 Log('error empty match method')
                 sys.exit(0)
-
-        # check match
-        if MatchMethod._upper(self.match_method) not in MatchMethod.LIST:
-            Log('invalid match method: {}'.format(self.match_method))
-            sys.exit(0)
-        else:
-            self.match_method = MatchMethod._upper(self.match_method)
+            if MatchMethod._upper(self.match_method) not in MatchMethod.LIST:
+                Log('invalid match method: {}'.format(self.match_method))
+                sys.exit(0)
+            else:
+                self.match_method = MatchMethod._upper(self.match_method)
 
         # check rule
         if self.use_default_rule:
@@ -219,7 +217,7 @@ def parse_arg():
     g.add_argument('-c', '--rule_config',  default=None, help='rule config file path')
     g.add_argument('-r', '--use_default_rule', action="store_true", help="use default rule file")
 
-    parser.add_argument('-p', '--history_path', default=osp.expanduser(settings.ZSH_HISTORY_FILE), help='history file path, default ~/.zsh_history')
+    parser.add_argument('-p', '--history_path', default=full_path(settings.ZSH_HISTORY_FILE), help='history file path, default ~/.zsh_history')
     parser.add_argument('-o', '--output', help='output path, default same as history_path')
     parser.add_argument('-d', '--debug', action="store_true", help="debug")
     args = parser.parse_args()
