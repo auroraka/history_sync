@@ -12,7 +12,7 @@ _START // 空格
 _START // tab
 	
 
-_START // ^[
+_CONTAINS // ^[
 
 
 _START
@@ -50,6 +50,9 @@ _START
 
 _CONTAINS
 。
+
+_CONTAINS // 全角井号
+＃
 
 _CONTAINS
 momenta
