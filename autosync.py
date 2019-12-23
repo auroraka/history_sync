@@ -30,5 +30,4 @@ def auto_sync():
 
 
 if __name__ == '__main__':
-    print('history_sync refactoring...')
-    # auto_sync()
+    auto_sync()
