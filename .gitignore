@@ -5,3 +5,4 @@ __pycache__
 conf/settings_local.py
 *.pyc
 .vscode
+my_history
