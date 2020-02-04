@@ -51,7 +51,7 @@ def git_check(repo, repo_dir):
     git_ensure_username_and_email()
 
     if not git_check_repo_exists(repo):
-        msg = 'repo %s not found in directory: %s' % (repo, repo_dir)
+        msg = 'repo %s in directory: %s not found or broken, please delete repo directory and try again' % (repo, repo_dir)
         raise Exception(msg)
 
     if not git_check_repo_clean():
