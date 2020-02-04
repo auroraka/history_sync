@@ -1,3 +1,15 @@
+import sys
+
+# python >= 3.7
+if sys.version_info.major >=3 and sys.version_info.minor >=7:
+    # use build-in function
+    def isascii(s):
+        return s.isascii()
+# python < 3.7
+else:
+    def isascii(s):
+        return all(ord(c) < 128 for c in s)
+
 from operator import attrgetter
 import re
 
@@ -44,7 +56,7 @@ def action_limit_cmd_lines(objs):
 
 
 def action_keep_only_acsii_cmd(objs):
-    objs = [h for h in objs if h.cmd.isascii()]
+    objs = [h for h in objs if isascii(h.cmd)]
     return objs
 
 
